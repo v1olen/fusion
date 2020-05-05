@@ -1,0 +1,15 @@
+[package]
+name = "fusion"
+version = "0.1.0"
+authors = ["V1oL3nc <v1ol3nc@protonmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = "3.0.0-beta.1"
+serde = { version = "1.0.106", features = ["derive"] }
+csv = "1.1"
+tabular = "0.1.4"
+term_size = "0.3.2"
+colored = "1.9"
