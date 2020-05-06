@@ -5,7 +5,7 @@ use tabular::{Row, Table};
 mod fusion_core;
 use fusion_core::{term, Network};
 
-/// Simple wlan management tool with gnu-like syntax
+/// Fusion is simple wlan management tool with unix-like commands syntax.
 ///
 #[derive(Clap)]
 #[clap(version = "0.3.0", author = "V1oL3nc")]
@@ -16,15 +16,21 @@ struct Opts {
 
 #[derive(Clap)]
 enum SubCommand {
+    /// Lists wlan networks nearby
     #[clap(name = "ls", version = "0.1.0")]
     List(List),
 }
 
 #[derive(Clap)]
+struct Kill {
+}
+
+#[derive(Clap)]
 struct List {
-    /// use a long listing format
+    /// Uses a long listing format
     #[clap(short = "l", version = "0.2.0")]
     as_long_list: bool,
+    /// Prints with human readable data
     #[clap(short = "h", version = "0.3.0")]
     as_human_readable: bool,
 }
