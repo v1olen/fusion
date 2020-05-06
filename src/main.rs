@@ -8,7 +8,7 @@ use fusion_core::{term, Network};
 /// Fusion is simple wlan management tool with unix-like commands syntax.
 ///
 #[derive(Clap)]
-#[clap(version = "0.3.0", author = "V1oL3nc")]
+#[clap(version = "0.4.0", author = "V1oL3nc")]
 struct Opts {
     #[clap(subcommand)]
     subcmd: SubCommand,
