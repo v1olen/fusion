@@ -19,6 +19,9 @@ enum SubCommand {
     /// Lists wlan networks nearby
     #[clap(name = "ls", version = "0.1.0")]
     List(List),
+    /// Disconnects current connection
+    #[clap(name = "kill", version = "0.4.0")]
+    Kill(Kill),
 }
 
 #[derive(Clap)]
@@ -92,5 +95,11 @@ fn main() {
                 print!("{}", term::make_vec_printable(names));
             }
         }
+        SubCommand::Kill(_) => {
+            std::process::Command::new("sh")
+                .args(&["-c", "nmcli con down id \"`nmcli connection show|grep wifi|grep -v ' -- '|awk -F '[[:space:]][[:space:]]+' {'print $1'}`\""])
+                .output()
+                .expect("Failed executing nmcli");
+        }
     }
-}
+}   
