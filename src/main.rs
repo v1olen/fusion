@@ -8,7 +8,7 @@ use fusion_core::{term, Network};
 /// Fusion is simple wlan management tool with unix-like commands syntax.
 ///
 #[derive(Clap)]
-#[clap(version = "0.4.0", author = "V1oL3nc")]
+#[clap(version = "0.5.0", author = "V1oL3nc")]
 struct Opts {
     #[clap(subcommand)]
     subcmd: SubCommand,
@@ -22,10 +22,18 @@ enum SubCommand {
     /// Disconnects current connection
     #[clap(name = "kill", version = "0.4.0")]
     Kill(Kill),
+    /// Connects with specified network
+    #[clap(name = "touch", version = "0.5.0")]
+    Touch(Touch),
 }
 
 #[derive(Clap)]
-struct Kill {
+struct Kill {}
+
+#[derive(Clap)]
+struct Touch {
+    /// SSID of Network to connect with
+    ssid: String,
 }
 
 #[derive(Clap)]
@@ -98,6 +106,13 @@ fn main() {
         SubCommand::Kill(_) => {
             std::process::Command::new("sh")
                 .args(&["-c", "nmcli con down id \"`nmcli connection show|grep wifi|grep -v ' -- '|awk -F '[[:space:]][[:space:]]+' {'print $1'}`\""])
+                .output()
+                .expect("Failed executing nmcli");
+        }
+        SubCommand::Touch(options) => {
+            let password = rpassword::read_password_from_tty(None).expect("Input is malformed");
+            std::process::Command::new("nmcli")
+                .args(&["dev", "wifi", "connect", options.ssid.as_str(), "password", password.as_str()])
                 .output()
                 .expect("Failed executing nmcli");
         }
