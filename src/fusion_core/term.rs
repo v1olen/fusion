@@ -1,8 +1,15 @@
 use tabular::{Row, Table};
 
-pub fn make_vec_printable(strings: Vec<String>) -> String {
+pub fn make_vec_printable<T>(strings: Vec<T>) -> String
+where
+    T: ToString,
+{
+    let strings: Vec<String> = strings
+        .into_iter()
+        .map(|string| string.to_string())
+        .collect();
     let (term_width, _) = term_size::dimensions().unwrap();
-    let dspace_separated_strings = strings.join("  ");
+    let dspace_separated_strings: String = strings.join("  ");
 
     if dspace_separated_strings.len() < term_width {
         return dspace_separated_strings;

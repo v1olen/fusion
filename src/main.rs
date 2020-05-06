@@ -44,11 +44,15 @@ fn main() {
                 .map(|record| Network::from(record.unwrap()))
                 .collect();
 
-            let names: Vec<String> = networks
+            let names: Vec<ColoredString> = networks
                 .iter()
-                .map(|network| network.ssid.clone())
+                .map(|network| match network.security {
+                    NetworkSecurity(Security::None, Security::None) => {
+                        network.ssid.clone().green()
+                    }
+                    _ => network.ssid.clone().red(),
+                })
                 .collect();
-            
             print!("{}", term::make_vec_printable(names));
         }
     }
