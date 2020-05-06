@@ -1,13 +1,14 @@
 use clap::Clap;
 use colored::*;
+use tabular::{Row, Table};
 
 mod fusion_core;
-use fusion_core::{Network, NetworkSecurity, Security, term};
+use fusion_core::{term, Network, NetworkSecurity, Security};
 
 /// Simple wlan management tool with gnu-like syntax
 ///
 #[derive(Clap)]
-#[clap(version = "0.1.0", author = "V1oL3nc")]
+#[clap(version = "0.2.0", author = "V1oL3nc")]
 struct Opts {
     #[clap(subcommand)]
     subcmd: SubCommand,
@@ -20,13 +21,17 @@ enum SubCommand {
 }
 
 #[derive(Clap)]
-struct List {}
+struct List {
+    /// use a long listing format
+    #[clap(short = "l", version = "0.2.0")]
+    as_long_list: bool,
+}
 
 fn main() {
     let opts: Opts = Opts::parse();
 
     match opts.subcmd {
-        SubCommand::List(_) => {
+        SubCommand::List(options) => {
             let list_as_csv_string: String = String::from_utf8({
                 std::process::Command::new("sh")
                     .args(&["-c", "nmcli --fields bssid,ssid,chan,signal,security dev wifi|awk -F '[[:space:]][[:space:]]+' {'print $1\"\t\"$2\"\t\"$3\"\t\"$4\"\t\"$5'}"])
@@ -43,17 +48,37 @@ fn main() {
                 .deserialize()
                 .map(|record| Network::from(record.unwrap()))
                 .collect();
-
-            let names: Vec<ColoredString> = networks
-                .iter()
-                .map(|network| match network.security {
-                    NetworkSecurity(Security::None, Security::None) => {
-                        network.ssid.clone().green()
-                    }
-                    _ => network.ssid.clone().red(),
-                })
-                .collect();
-            print!("{}", term::make_vec_printable(names));
+            if options.as_long_list {
+                println!("total {}", networks.len());
+                let mut table = Table::new("{:<} {:>} {:<} {:>} {:<}");
+                for network in networks {
+                    table.add_row(
+                        Row::new()
+                            .with_cell(network.bssid.clone())
+                            .with_cell(network.channel.clone())
+                            .with_cell(network.security.clone())
+                            .with_cell(network.signal.clone())
+                            .with_cell(if network.is_secured() {
+                                network.ssid.clone().white()
+                            } else {
+                                network.ssid.clone().green()
+                            }),
+                    );
+                }
+                print!("{}", table);
+            } else {
+                let names: Vec<ColoredString> = networks
+                    .iter()
+                    .map(|network| {
+                        if network.is_secured() {
+                            network.ssid.clone().white()
+                        } else {
+                            network.ssid.clone().green()
+                        }
+                    })
+                    .collect();
+                print!("{}", term::make_vec_printable(names));
+            }
         }
     }
 }
