@@ -3,12 +3,12 @@ use colored::*;
 use tabular::{Row, Table};
 
 mod fusion_core;
-use fusion_core::{term, Network, NetworkSecurity, Security};
+use fusion_core::{term, Network};
 
 /// Simple wlan management tool with gnu-like syntax
 ///
 #[derive(Clap)]
-#[clap(version = "0.2.0", author = "V1oL3nc")]
+#[clap(version = "0.3.0", author = "V1oL3nc")]
 struct Opts {
     #[clap(subcommand)]
     subcmd: SubCommand,
@@ -25,6 +25,8 @@ struct List {
     /// use a long listing format
     #[clap(short = "l", version = "0.2.0")]
     as_long_list: bool,
+    #[clap(short = "h", version = "0.3.0")]
+    as_human_readable: bool,
 }
 
 fn main() {
@@ -34,7 +36,7 @@ fn main() {
         SubCommand::List(options) => {
             let list_as_csv_string: String = String::from_utf8({
                 std::process::Command::new("sh")
-                    .args(&["-c", "nmcli --fields bssid,ssid,chan,signal,security dev wifi|awk -F '[[:space:]][[:space:]]+' {'print $1\"\t\"$2\"\t\"$3\"\t\"$4\"\t\"$5'}"])
+                    .args(&["-c", "nmcli --fields bssid,ssid,chan,freq,signal,security dev wifi|awk -F '[[:space:]][[:space:]]+' {'print $1\"\t\"$2\"\t\"$3\"\t\"$4\"\t\"$5\"\t\"$6'}"])
                     .output()
                     .expect("Failed executing nmcli")
                     .stdout
@@ -55,7 +57,11 @@ fn main() {
                     table.add_row(
                         Row::new()
                             .with_cell(network.bssid.clone())
-                            .with_cell(network.channel.clone())
+                            .with_cell(if !options.as_human_readable {
+                                network.channel.clone().to_string()
+                            } else {
+                                format!("{} MHz", network.frequency.clone())
+                            })
                             .with_cell(network.security.clone())
                             .with_cell(network.signal.clone())
                             .with_cell(if network.is_secured() {

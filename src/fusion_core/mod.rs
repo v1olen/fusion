@@ -11,6 +11,8 @@ pub struct Network {
     pub ssid: String,
     #[serde(rename = "CHAN")]
     pub channel: u8,
+    #[serde(rename = "FREQ", with = "parsers::frequency")]
+    pub frequency: u16,
     #[serde(rename = "SIGNAL")]
     pub signal: u8,
     #[serde(rename = "SECURITY", with = "parsers::network_security")]
