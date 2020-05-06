@@ -1,5 +1,8 @@
 use serde::Deserialize;
 
+mod parsers;
+pub mod term;
+
 #[derive(Debug, Deserialize)]
 pub struct Network {
     #[serde(rename = "BSSID")]
@@ -10,7 +13,7 @@ pub struct Network {
     pub channel: u8,
     #[serde(rename = "SIGNAL")]
     pub signal: u8,
-    #[serde(rename = "SECURITY", with = "network_security_parser")]
+    #[serde(rename = "SECURITY", with = "parsers::network_security")]
     pub security: NetworkSecurity,
 }
 
@@ -38,29 +41,4 @@ impl From<String> for Security {
     }
 }
 
-mod network_security_parser {
-    use serde::{de::Error, Deserialize, Deserializer};
-    pub fn deserialize<'de, D>(d: D) -> Result<super::NetworkSecurity, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        match String::deserialize(d) {
-            Ok(string) => {
-                let mut iter = string.split_whitespace();
-                Ok(super::NetworkSecurity(
-                    match iter.next() {
-                        None => super::Security::None,
-                        Some(security_str) => super::Security::from(security_str.to_string()),
-                    },
-                    match iter.next() {
-                        None => super::Security::None,
-                        Some(security_str) => super::Security::from(security_str.to_string()),
-                    },
-                ))
-            }
-            _ => Err(D::Error::custom(format_args!(
-                "nmcli data malformed or unsupported"
-            ))),
-        }
-    }
-}
+

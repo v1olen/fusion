@@ -1,9 +1,8 @@
 use clap::Clap;
 use colored::*;
-use tabular::{Row, Table};
 
 mod fusion_core;
-use fusion_core::{Network, NetworkSecurity, Security};
+use fusion_core::{Network, NetworkSecurity, Security, term};
 
 /// Simple wlan management tool with gnu-like syntax
 ///
@@ -49,44 +48,8 @@ fn main() {
                 .iter()
                 .map(|network| network.ssid.clone())
                 .collect();
-            let (term_width, _) = term_size::dimensions().unwrap();
-            let dspace_separated_names = names.join("  ");
-
-            if dspace_separated_names.len() < term_width {
-                println!("{}", dspace_separated_names);
-            } else {
-                let largest_size = names.iter().fold(0, |acc, element| {
-                    if element.len() > acc {
-                        element.len()
-                    } else {
-                        acc
-                    }
-                });
-                let columns = (term_width / (largest_size + 2)) as u8;
-                let table_structure = (0..columns).map(|_| "{:<}  ").collect::<String>();
-                let mut table = Table::new(table_structure.as_str());
-                let rows = (names.len() as f32 / columns as f32).ceil() as u8;
-                for row in 0..rows {
-                    let mut table_row = Row::new();
-                    for cell in 0..columns {
-                        let index: usize = cell as usize + row as usize * columns as usize;
-                        table_row = if index + 1 >= names.len() {
-                            table_row.with_cell("")
-                        } else {
-                            table_row.with_cell({
-                                match networks[index].security {
-                                    NetworkSecurity(Security::None, Security::None) => {
-                                        names[index].clone().green()
-                                    }
-                                    _ => names[index].clone().red(),
-                                }
-                            })
-                        };
-                    }
-                    table.add_row(table_row);
-                }
-                print!("{}", table);
-            }
+            
+            print!("{}", term::make_vec_printable(names));
         }
     }
 }
