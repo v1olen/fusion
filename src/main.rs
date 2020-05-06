@@ -7,7 +7,7 @@ use fusion_core::{Network, NetworkSecurity, Security, term};
 /// Simple wlan management tool with gnu-like syntax
 ///
 #[derive(Clap)]
-#[clap(version = "1.0", author = "V1oL3nc")]
+#[clap(version = "0.1.0", author = "V1oL3nc")]
 struct Opts {
     #[clap(subcommand)]
     subcmd: SubCommand,
@@ -15,7 +15,7 @@ struct Opts {
 
 #[derive(Clap)]
 enum SubCommand {
-    #[clap(name = "ls", version = "1.0")]
+    #[clap(name = "ls", version = "0.1.0")]
     List(List),
 }
 
